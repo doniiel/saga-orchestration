@@ -1,0 +1,9 @@
+package com.dan1yal.orderservice.command;
+
+import lombok.Data;
+
+@Data
+public class CancelOrderCommand {
+    private String orderId;
+
+}
