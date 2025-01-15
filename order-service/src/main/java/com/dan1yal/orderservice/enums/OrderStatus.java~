@@ -1,7 +1,0 @@
-package com.dan1yal.orderservice.enums;
-
-public enum OrderStatus {
-    CREATED,
-    DELIVERED,
-    REJECTED
-}
