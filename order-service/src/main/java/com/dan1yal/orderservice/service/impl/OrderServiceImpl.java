@@ -22,7 +22,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderHistoryService orderHistoryService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    @Value("${orders.event.topic.name}")
+    @Value("${orders.event.topic-name}")
     private String orderEventTopicName;
     @Override
     public OrderDto createOrder(OrderRequest request) {

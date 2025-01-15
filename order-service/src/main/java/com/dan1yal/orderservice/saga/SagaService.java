@@ -16,14 +16,14 @@ import java.math.BigDecimal;
 
 @Component
 @KafkaListener(topics = {
-        "${orders.event.topic.name}"
+        "${orders.event.topic-name}"
 })
 @RequiredArgsConstructor
 public class SagaService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    @Value("${orders.command.topic.name}")
+    @Value("${orders.command.topic-name}")
     private String orderCommandTopicName;
-    @Value("${inventory.command.topic.name}")
+    @Value("${inventory.command.topic-name}")
     private String inventoryCommandTopicName;
 
 

@@ -9,10 +9,10 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaConfig {
 
-    @Value("${orders.command.topic.name}")
+    @Value("${orders.command.topic-name}")
     private String ordersCommandTopicName;
 
-    @Value("${orders.event.topic.name}")
+    @Value("${orders.event.topic-name}")
     private String ordersEventTopicName;
 
     private final static Integer TOPIC_REPLICATION_FACTOR = 3;
