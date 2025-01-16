@@ -11,10 +11,10 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderCommand {
+public class ReserveInventoryCommand {
     private String orderId;
-    private String productId;
     private String userId;
+    private String productId;
     private Integer quantity;
-    private BigDecimal price;
+    private BigDecimal amount;
 }
