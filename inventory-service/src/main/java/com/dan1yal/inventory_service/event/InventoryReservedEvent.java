@@ -1,10 +1,12 @@
 package com.dan1yal.inventory_service.event;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@Builder
 public class InventoryReservedEvent {
     private String orderId;
     private String productId;
