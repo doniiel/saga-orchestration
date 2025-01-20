@@ -1,8 +1,7 @@
-package com.dan1yal.payment_service.command;
+package com.dan1yal.orderservice.command.payment;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.math.BigDecimal;
 

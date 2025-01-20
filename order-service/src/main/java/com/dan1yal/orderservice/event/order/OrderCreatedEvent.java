@@ -1,17 +1,13 @@
-package com.dan1yal.orderservice.command;
+package com.dan1yal.orderservice.event.order;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class CreatedOrderCommand {
+public class OrderCreatedEvent {
     private String orderId;
     private String productId;
     private String userId;

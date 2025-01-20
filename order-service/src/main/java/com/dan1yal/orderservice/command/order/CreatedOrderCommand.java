@@ -1,4 +1,4 @@
-package com.dan1yal.orderservice.command;
+package com.dan1yal.orderservice.command.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,10 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReserveInventoryCommand {
+public class CreatedOrderCommand {
     private String orderId;
-    private String userId;
     private String productId;
+    private String userId;
     private Integer quantity;
-    private BigDecimal amount;
+    private BigDecimal price;
 }

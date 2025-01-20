@@ -1,7 +1,7 @@
 package com.dan1yal.orderservice.service.impl;
 
 import com.dan1yal.orderservice.dto.OrderDto;
-import com.dan1yal.orderservice.event.OrderCreatedEvent;
+import com.dan1yal.orderservice.event.order.OrderCreatedEvent;
 import com.dan1yal.orderservice.mapper.OrderMapper;
 import com.dan1yal.orderservice.model.Order;
 import com.dan1yal.orderservice.repository.OrderRepository;
