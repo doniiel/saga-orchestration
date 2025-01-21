@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CompleteOrderCommand {
-    private String orderId;
+public class CancelOrderCommand {
+    private Long orderId;
 }

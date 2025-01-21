@@ -28,24 +28,30 @@ public class InventoryCommandHandler {
     public void handleCommand(@Payload ReserveInventoryCommand command) {
         try {
             productService.reserveProduct(command.getProductId(), command.getQuantity());
-
-            InventoryReservedEvent event = InventoryReservedEvent.builder()
-                    .orderId(command.getOrderId())
-                    .productId(command.getProductId())
-                    .amount(command.getAmount())
-                    .quantity(command.getQuantity())
-                    .build();
-            kafkaTemplate.send(inventoryEventsTopicName, command);
+            processSuccessfulReservation(command);
+            log.info("Inventory successfully reserved for Order ID: {}", command.getOrderId());
         }  catch (Exception e) {
-            log.error("Error processing command", e);
-
-            InventoryReservationFailedEvent event = InventoryReservationFailedEvent.builder()
-                    .orderId(command.getOrderId())
-                    .productId(command.getProductId())
-                    .amount(command.getAmount())
-                    .quantity(command.getQuantity())
-                    .build();
-            kafkaTemplate.send(inventoryEventsTopicName, event);
+            log.error("Error processing ReserveInventoryCommand: {}", command, e);
+            processFailedReservation(command, e);
         }
+    }
+
+    private void processSuccessfulReservation(ReserveInventoryCommand command) {
+        InventoryReservedEvent event = InventoryReservedEvent.builder()
+                .orderId(command.getOrderId())
+                .productId(command.getProductId())
+                .amount(command.getAmount())
+                .quantity(command.getQuantity())
+                .build();
+        kafkaTemplate.send(inventoryEventsTopicName, event);
+    }
+    private void processFailedReservation(ReserveInventoryCommand command, Exception e) {
+        InventoryReservationFailedEvent event = InventoryReservationFailedEvent.builder()
+                .orderId(command.getOrderId())
+                .productId(command.getProductId())
+                .amount(command.getAmount())
+                .quantity(command.getQuantity())
+                .build();
+        kafkaTemplate.send(inventoryEventsTopicName, event);
     }
 }

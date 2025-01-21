@@ -19,12 +19,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final OrderHistoryService orderHistoryService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     @Value("${orders.event.topic-name}")
     private String orderEventTopicName;
+
     @Override
     @Transactional
     public OrderDto createOrder(OrderRequest request) {
@@ -62,5 +64,10 @@ public class OrderServiceImpl implements OrderService {
         if (orderRepository.existsById(id)) {
             orderRepository.deleteById(id);
         }
+    }
+
+    @Override
+    public void cancelOrder(Long orderId) {
+        orderHistoryService.updateOrderStatus(orderId.toString(), "CANCELLED");
     }
 }

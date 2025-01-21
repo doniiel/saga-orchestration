@@ -1,6 +1,6 @@
-package com.dan1yal.payment_service.event;
+package com.dan1yal.orderservice.event.payment;
 
-import com.dan1yal.payment_service.enums.Status;
+import com.dan1yal.orderservice.enums.Status;
 import lombok.Builder;
 import lombok.Data;
 
