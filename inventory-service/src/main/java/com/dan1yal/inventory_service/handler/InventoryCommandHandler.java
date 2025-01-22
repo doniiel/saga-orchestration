@@ -12,11 +12,13 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${inventory.command.topic-name}", groupId = "${spring.kafka.consumer.group-id}")
+@KafkaListener(topics = "${inventory.command.topic-name}")
+@Transactional
 public class InventoryCommandHandler {
 
     private final ProductService productService;
@@ -26,6 +28,7 @@ public class InventoryCommandHandler {
 
     @KafkaHandler
     public void handleCommand(@Payload ReserveInventoryCommand command) {
+        log.info("Received ReserveInventoryCommand: {}", command);
         try {
             productService.reserveProduct(command.getProductId(), command.getQuantity());
             processSuccessfulReservation(command);

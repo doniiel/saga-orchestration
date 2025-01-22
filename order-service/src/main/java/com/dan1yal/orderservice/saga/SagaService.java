@@ -10,7 +10,6 @@ import com.dan1yal.orderservice.event.notification.NotificationSentEvent;
 import com.dan1yal.orderservice.event.order.OrderCompletedEvent;
 import com.dan1yal.orderservice.event.order.OrderCreatedEvent;
 import com.dan1yal.orderservice.event.payment.PaymentProcessedEvent;
-import com.dan1yal.orderservice.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +18,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -31,10 +31,10 @@ import java.math.BigDecimal;
         "${notification.event.topic-name}"
 })
 @RequiredArgsConstructor
+@Transactional
 public class SagaService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final OrderHistoryService orderHistoryService;
     @Value("${orders.command.topic-name}")
     private String orderCommandTopicName;
     @Value("${inventory.command.topic-name}")
@@ -45,12 +45,15 @@ public class SagaService {
     private String notificationCommandTopicName;
 
     @KafkaHandler
-    public void handleOrderCreated(@Payload OrderCreatedEvent event) {
+    public void handleEvent(@Payload OrderCreatedEvent event) {
+        log.info("Received OrderCreatedEvent: {}", event);
         BigDecimal totalCost = event.getPrice().multiply(BigDecimal.valueOf(event.getQuantity()));
 
         ReserveInventoryCommand command = ReserveInventoryCommand.builder()
                 .orderId(event.getOrderId())
                 .userId(event.getUserId())
+                .productId(event.getProductId())
+                .quantity(event.getQuantity())
                 .amount(totalCost)
                 .build();
 

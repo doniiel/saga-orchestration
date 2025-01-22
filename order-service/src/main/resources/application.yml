@@ -43,3 +43,17 @@ orders:
 inventory:
   command:
     topic-name: inventory-command-topic
+  event:
+    topic-name: inventory-event-topic
+
+payment:
+  command:
+    topic-name: payment-command-topic
+  event:
+    topic-name: payment-event-topic
+
+notification:
+  command:
+    topic-name: notification-command-topic
+  event:
+    topic-name: notification-event-topic

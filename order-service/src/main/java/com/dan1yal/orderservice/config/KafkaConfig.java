@@ -15,6 +15,9 @@ public class KafkaConfig {
     @Value("${orders.event.topic-name}")
     private String ordersEventTopicName;
 
+    @Value("${inventory.command.topic-name}")
+    private String inventoryCommandTopicName;
+
     private final static Integer TOPIC_REPLICATION_FACTOR = 3;
     private final static Integer TOPIC_PARTITIONS = 3;
 
@@ -30,6 +33,13 @@ public class KafkaConfig {
     @Bean
     NewTopic createOrdersEventTopic() {
         return TopicBuilder.name(ordersEventTopicName)
+                .partitions(TOPIC_PARTITIONS)
+                .replicas(TOPIC_REPLICATION_FACTOR)
+                .build();
+    }
+    @Bean
+    NewTopic createInventoryCommandTopic() {
+        return TopicBuilder.name(inventoryCommandTopicName)
                 .partitions(TOPIC_PARTITIONS)
                 .replicas(TOPIC_REPLICATION_FACTOR)
                 .build();
