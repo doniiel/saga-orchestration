@@ -31,6 +31,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public boolean cancelReservation(String productId, int quantity) {
+        Product product = repository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product with id " + productId + " not found"));
+        product.setQuantity(product.getQuantity() + quantity);
+        repository.save(product);
+        return true;
+    }
+
+    @Override
     public List<ProductDto> getProducts() {
         List<Product> products = repository.findAll();
         return productMapper.toProductDtoList(products);

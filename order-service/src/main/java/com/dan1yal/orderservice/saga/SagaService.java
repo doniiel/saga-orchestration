@@ -1,15 +1,19 @@
 package com.dan1yal.orderservice.saga;
 
-import com.dan1yal.orderservice.command.inventory.ReserveInventoryCommand;
-import com.dan1yal.orderservice.command.notification.SendNotificationCommand;
-import com.dan1yal.orderservice.command.order.CancelOrderCommand;
-import com.dan1yal.orderservice.command.order.CompleteOrderCommand;
-import com.dan1yal.orderservice.command.payment.ProcessPaymentCommand;
-import com.dan1yal.orderservice.event.inventory.InventoryReservedEvent;
-import com.dan1yal.orderservice.event.notification.NotificationSentEvent;
-import com.dan1yal.orderservice.event.order.OrderCompletedEvent;
-import com.dan1yal.orderservice.event.order.OrderCreatedEvent;
-import com.dan1yal.orderservice.event.payment.PaymentProcessedEvent;
+import com.example.demo.commands.notification.SendNotificationCommand;
+import com.example.demo.commands.order.CompleteOrderCommand;
+import com.example.demo.commands.inventory.CancelReserveInventoryCommand;
+import com.example.demo.commands.payment.CancelPaymentCommand;
+import com.example.demo.commands.payment.ProcessPaymentCommand;
+import com.example.demo.commands.inventory.ReserveInventoryCommand;
+import com.example.demo.commands.order.CancelOrderCommand;
+import com.example.demo.events.notification.NotificationFailedSentEvent;
+import com.example.demo.events.notification.NotificationSentEvent;
+import com.example.demo.events.order.OrderCreatedEvent;
+import com.example.demo.events.inventory.InventoryReservationFailedEvent;
+import com.example.demo.events.inventory.InventoryReservedEvent;
+import com.example.demo.events.payment.PaymentFailedEvent;
+import com.example.demo.events.payment.PaymentProcessedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,13 +53,13 @@ public class SagaService {
         log.info("Received OrderCreatedEvent: {}", event);
         BigDecimal totalCost = event.getPrice().multiply(BigDecimal.valueOf(event.getQuantity()));
 
-        ReserveInventoryCommand command = ReserveInventoryCommand.builder()
-                .orderId(event.getOrderId())
-                .userId(event.getUserId())
-                .productId(event.getProductId())
-                .quantity(event.getQuantity())
-                .amount(totalCost)
-                .build();
+        ReserveInventoryCommand command =  new ReserveInventoryCommand(
+                event.getOrderId(),
+                event.getUserId(),
+                event.getProductId(),
+                event.getQuantity(),
+                totalCost
+        );
 
         log.info("Sending ReserveInventoryCommand: {}", command);
         kafkaTemplate.send(inventoryCommandTopicName, command);
@@ -63,46 +67,77 @@ public class SagaService {
 
     @KafkaHandler
     public void handleInventoryReserved(@Payload InventoryReservedEvent event) {
-        ProcessPaymentCommand command = ProcessPaymentCommand.builder()
-                .orderId(event.getOrderId())
-                .amount(event.getAmount())
-                .build();
+        log.info("Received InventoryReservedEvent: {}", event);
+        ProcessPaymentCommand command = new ProcessPaymentCommand(
+                event.getOrderId(),
+                event.getProductId(),
+                event.getQuantity(),
+                event.getAmount()
+                );
         log.info("Sending ProcessPaymentCommand: {}", command);
         kafkaTemplate.send(paymentCommandTopicName, command);
     }
 
     @KafkaHandler
-    public void handleInventoryReservationFailed(@Payload InventoryReservedEvent event) {
-        CancelOrderCommand command = CancelOrderCommand.builder().build();
+    public void hanldeInverntoryReservationFailed(@Payload InventoryReservationFailedEvent event) {
+        log.info("Received InventoryReservationFailedEvent: {}", event);
+        CancelOrderCommand command = new CancelOrderCommand(
+                event.getOrderId()
+        );
         log.info("Sending CancelOrderCommand: {}", command);
         kafkaTemplate.send(orderCommandTopicName, command);
     }
 
     @KafkaHandler
     public void handlePaymentProcessed(@Payload PaymentProcessedEvent event) {
-        SendNotificationCommand command = SendNotificationCommand.builder()
-                .orderId(event.getOrderId())
-                .amount(event.getAmount())
-                .status(event.getStatus())
-                .build();
+        log.info("Received PaymentProcessedEvent: {}", event);
+        SendNotificationCommand command = new SendNotificationCommand(
+                event.getOrderId(),
+                event.getProductId(),
+                event.getQuantity(),
+                event.getAmount(),
+                event.getStatus()
+                );
         log.info("Sending SendNotificationCommand: {}", command);
         kafkaTemplate.send(notificationCommandTopicName,command);
+    }
+
+    @KafkaHandler
+    public void handlePaymentFailed(@Payload PaymentFailedEvent event) {
+        log.info("Received PaymentFailedEvent: {}", event);
+        CancelReserveInventoryCommand command = new CancelReserveInventoryCommand(
+                event.getOrderId(),
+                event.getProductId(),
+                event.getQuantity(),
+                event.getAmount()
+        );
+        log.info("Sending CancelReserveInventoryCommand: {}", command);
+        kafkaTemplate.send(inventoryCommandTopicName, command);
     }
 
 
     @KafkaHandler
     public void handleNotificationSent(@Payload NotificationSentEvent event) {
-        CompleteOrderCommand command = CompleteOrderCommand.builder()
-                .orderId(event.getOrderId())
-                .build();
+        CompleteOrderCommand command = new CompleteOrderCommand(
+                event.getOrderId(),
+                event.getProductId(),
+                event.getQuantity(),
+                event.getAmount()
+        );
 
         log.info("Sending CompleteOrderCommand: {}", command);
         kafkaTemplate.send(orderCommandTopicName,command);
     }
 
     @KafkaHandler
-    public void handler(@Payload OrderCompletedEvent event) {
-        log.info("Order processing completed successfully:");
-//        orderHistoryService.updateOrderStatus(event.getOrderId(), OrderStatus.COMPLETED);
+    public void handleNotificationFailed(@Payload NotificationFailedSentEvent event) {
+        CancelPaymentCommand command = new CancelPaymentCommand(
+                event.getOrderId(),
+                event.getProductId(),
+                event.getQuantity(),
+                event.getAmount()
+        );
+        log.info("Sending CancelPaymentCommand: {}", command);
+        kafkaTemplate.send(paymentCommandTopicName,command);
     }
 }

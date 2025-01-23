@@ -30,6 +30,11 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    @Override
+    public void cancelPayment(String orderId) {
+        log.info("Cancelling payment for Order ID: {}", orderId);
+    }
+
     private void simulateExternalPaymentProcessing(String orderId, BigDecimal amount) throws InterruptedException {
         Thread.sleep(1000);
         if (Math.random() < 0.1) {

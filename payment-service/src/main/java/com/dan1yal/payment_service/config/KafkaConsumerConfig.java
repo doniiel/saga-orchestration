@@ -24,8 +24,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class KafkaConsumerConfig {
     private final Environment environment;
-
-
     @Bean
     ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> config = new HashMap<>();

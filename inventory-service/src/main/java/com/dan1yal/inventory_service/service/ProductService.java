@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface ProductService {
     void reserveProduct(String productId, int quantity);
+    boolean cancelReservation(String productId, int quantity);
     List<ProductDto> getProducts();
     ProductDto createProduct(ProductCreateRequest request);
 }

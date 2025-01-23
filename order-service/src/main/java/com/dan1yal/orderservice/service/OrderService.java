@@ -15,5 +15,6 @@ public interface OrderService {
 
     void deleteOrder(String id);
 
-    void cancelOrder(Long orderId);
+    void cancelOrder(String orderId);
+    void completeOrder(String orderId);
 }

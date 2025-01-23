@@ -1,10 +1,10 @@
 package com.dan1yal.notification_service.handler;
 
-import com.dan1yal.notification_service.command.SendNotificationCommand;
-import com.dan1yal.notification_service.event.NotificationFailedSentEvent;
-import com.dan1yal.notification_service.event.NotificationSentEvent;
 import com.dan1yal.notification_service.service.NotificationService;
 import com.dan1yal.notification_service.util.MessageUtil;
+import com.example.demo.commands.notification.SendNotificationCommand;
+import com.example.demo.events.notification.NotificationFailedSentEvent;
+import com.example.demo.events.notification.NotificationSentEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,8 +26,8 @@ public class NotificationCommandHandler {
     @KafkaHandler
     public void handleCommand(@Payload SendNotificationCommand command) {
         try {
-            processSuccessfulNotification(command);
             notificationService.sendNotification(command);
+            processSuccessfulNotification(command);
             log.info("Notification sent successfully for Order ID: {}", command.getOrderId());
         } catch (Exception e) {
             processFailedNotification(command);
@@ -36,18 +36,21 @@ public class NotificationCommandHandler {
     }
 
     private void processSuccessfulNotification(SendNotificationCommand command) {
-        NotificationSentEvent event = NotificationSentEvent.builder()
-                .orderId(command.getOrderId())
-                .message(MessageUtil.SUCCESS_MESSAGE)
-                .build();
+        NotificationSentEvent event = new NotificationSentEvent(
+                command.getOrderId(),
+                MessageUtil.SUCCESS_MESSAGE,
+                command.getProductId(),
+                command.getQuantity(),
+                command.getAmount()
+        );
         kafkaTemplate.send(notificationEventTopicName, event);
     }
 
     private void processFailedNotification(SendNotificationCommand command) {
-        NotificationFailedSentEvent event = NotificationFailedSentEvent.builder()
-                .orderId(command.getOrderId())
-                .message(MessageUtil.ERROR_MESSAGE)
-                .build();
+        NotificationFailedSentEvent event = new NotificationFailedSentEvent(
+                command.getOrderId(),
+                MessageUtil.ERROR_MESSAGE
+        );
         kafkaTemplate.send(notificationEventTopicName, event);
     }
 }

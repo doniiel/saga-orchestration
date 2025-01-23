@@ -1,7 +1,7 @@
 package com.dan1yal.orderservice.service.impl;
 
 import com.dan1yal.orderservice.dto.OrderDto;
-import com.dan1yal.orderservice.event.order.OrderCreatedEvent;
+import com.example.demo.events.order.OrderCreatedEvent;
 import com.dan1yal.orderservice.mapper.OrderMapper;
 import com.dan1yal.orderservice.model.Order;
 import com.dan1yal.orderservice.repository.OrderRepository;
@@ -34,13 +34,13 @@ public class OrderServiceImpl implements OrderService {
         Order savedOrder = orderRepository.save(newOrder);
         orderHistoryService.createOrderHistory(savedOrder.getOrderId());
 
-        OrderCreatedEvent event = OrderCreatedEvent.builder()
-                .orderId(savedOrder.getOrderId())
-                .productId(savedOrder.getProductId())
-                .userId(savedOrder.getUserId())
-                .quantity(savedOrder.getQuantity())
-                .price(savedOrder.getPrice())
-                .build();
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                savedOrder.getOrderId(),
+                savedOrder.getProductId(),
+                savedOrder.getUserId(),
+                savedOrder.getQuantity(),
+                savedOrder.getPrice()
+        );
         kafkaTemplate.send(orderEventTopicName, event);
 
         return orderMapper.toOrderDto(savedOrder);
@@ -67,7 +67,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancelOrder(Long orderId) {
+    public void cancelOrder(String orderId) {
         orderHistoryService.updateOrderStatus(orderId.toString(), "CANCELLED");
+    }
+
+    @Override
+    public void completeOrder(String orderId) {
+        orderHistoryService.updateOrderStatus(orderId.toString(), "COMPLETED");
     }
 }

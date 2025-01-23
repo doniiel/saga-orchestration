@@ -26,6 +26,6 @@ server:
 
 notification:
   command:
-    topic: notification-command
+    topic-name: notification-command
   event:
-    topic: notification-event
+    topic-name: notification-event

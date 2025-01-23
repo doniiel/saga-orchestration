@@ -16,7 +16,6 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class KafkaProducerConfig {
-
     private final Environment environment;
 
     @Bean
