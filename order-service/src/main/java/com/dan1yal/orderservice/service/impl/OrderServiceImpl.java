@@ -10,6 +10,9 @@ import com.dan1yal.orderservice.service.OrderHistoryService;
 import com.dan1yal.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "order")
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -29,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "orders", allEntries = true)
     public OrderDto createOrder(OrderRequest request) {
         Order newOrder = orderMapper.toOrder(request);
         Order savedOrder = orderRepository.save(newOrder);
@@ -47,11 +52,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Cacheable(key = "#id", unless = "#result == null")
     public OrderDto getOrderById(String id) {
-        if (orderRepository.existsById(id)) {
-            return orderMapper.toOrderDto(orderRepository.findById(id).get());
-        }
-        return null;
+        return orderRepository.findById(id)
+                .map(orderMapper::toOrderDto)
+                .orElse(null);
     }
 
     @Override
@@ -60,10 +65,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @CacheEvict(value = {"order", "orders", "history"}, key = "#id")
     public void deleteOrder(String id) {
         if (orderRepository.existsById(id)) {
             orderRepository.deleteById(id);
+            orderHistoryService.deleteOrderHistory(id);
         }
+    }
+
+    @Override
+    @CacheEvict(value = {"order", "orders"}, allEntries = true)
+    public void deleteAll() {
+        orderRepository.deleteAll();
     }
 
     @Override
